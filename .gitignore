@@ -1,0 +1,24 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*~
+*.swp
+
+# node / builds
+node_modules/
+dist/
+.next/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+.turbo/
+.vercel/
+*.log
+
+# Locally generated narration audio; distribute only audio cleared for release.
+services/gm/assets/fillers/*.wav
+
+# local env files
+.env
+.env.*
+!.env.example

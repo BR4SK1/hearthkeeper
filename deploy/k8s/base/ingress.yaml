@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hearthkeeper
+  labels:
+    app.kubernetes.io/part-of: hearthkeeper
+spec:
+  rules:
+    - host: hearthkeeper.example.invalid
+      http:
+        paths:
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: gm
+                port:
+                  number: 3001
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: gm
+                port:
+                  number: 3001
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: client
+                port:
+                  number: 3000

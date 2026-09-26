@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gm
+  labels:
+    app.kubernetes.io/name: gm
+    app.kubernetes.io/part-of: hearthkeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gm
+        app.kubernetes.io/part-of: hearthkeeper
+    spec:
+      containers:
+        - name: gm
+          image: hearthkeeper/gm:latest
+          ports:
+            - name: http
+              containerPort: 3001
+          env:
+            - name: HOST
+              value: "0.0.0.0"
+            - name: GM_PORT
+              value: "3001"
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openrouter-key
+                  key: OPENROUTER_API_KEY
+            - name: OPENROUTER_MODEL
+              value: openai/gpt-4o-mini
+            - name: CHATTERBOX_BASE_URL
+              value: http://chatterbox:8000
+            - name: CHATTERBOX_VOICE_MODE
+              value: clone
+            - name: CHATTERBOX_REFERENCE_AUDIO
+              value: reference.wav
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 20

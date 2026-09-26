@@ -1,0 +1,30 @@
+# Campfire web app image (Next.js). Built from the repo ROOT (workspace):
+#   docker build -f deploy/docker/Dockerfile.client -t hearthkeeper/client:latest .
+# NEXT_PUBLIC_GM_BASE_URL is intentionally unset at build: the client uses
+# same-origin relative /v1 behind Traefik path routing (deploy/k3s/30-ingress.yaml).
+FROM node:22-alpine
+
+RUN corepack enable
+
+WORKDIR /app
+
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+COPY packages ./packages
+COPY services ./services
+COPY apps ./apps
+
+# pnpm v10 blocks dependency build scripts in non-interactive CI
+# (ERR_PNPM_IGNORED_BUILDS on esbuild's postinstall). All native binaries this
+# workspace needs (@next/swc, sharp, esbuild) ship as platform optional-deps,
+# so install with --ignore-scripts; none of the build paths run postinstalls.
+RUN corepack pnpm install --frozen-lockfile --ignore-scripts
+RUN corepack pnpm --filter @hearthkeeper/libs build && corepack pnpm --filter @hearthkeeper/client build
+
+EXPOSE 3000
+
+# Run through pnpm: pnpm does not hoist workspace-package bins to the root
+# node_modules/.bin (the original `cd apps/client && ../../node_modules/.bin/next`
+# pointed at a path that does not exist under pnpm's layout). The --filter
+# form resolves next from apps/client/node_modules/.bin and runs with
+# cwd=apps/client so it finds the .next build.
+CMD ["corepack", "pnpm", "--filter", "@hearthkeeper/client", "start"]

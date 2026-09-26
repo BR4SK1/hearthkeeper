@@ -1,0 +1,22 @@
+# Root .dockerignore for workspace image builds (both Dockerfiles copy
+# from the repo root).
+node_modules
+**/node_modules
+.git
+.next
+**/.next
+**/.vite
+**/dist
+**/coverage
+**/.turbo
+**/*.tsbuildinfo
+.next
+docs
+**/*.md
+
+# Keep filler wav assets INCLUDED — gm loads services/gm/assets/fillers at
+# boot; do not add *.wav or assets exclusions here.
+# Local env files never go into images.
+.env
+.env.*
+!.env.example
